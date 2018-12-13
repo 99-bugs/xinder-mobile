@@ -4,7 +4,9 @@
     http://docs.nativescript.org/ui/action-bar
     -->
     <Page.actionBar>
-        <ActionBar title="Xinder" icon="" class="action-bar">
+        <ActionBar title="VIVES Xinder" icon="" class="action-bar">
+        <ActionItem tap="onScan" text="Scan QR" 
+            ios.systemIcon="16"></ActionItem>>
         </ActionBar>
     </Page.actionBar>
     <!--
@@ -19,7 +21,7 @@
     class names available for styling your app at https://docs.nativescript.org/ui/theme.
     -->
     <StackLayout class="p-20">
-        <Button text="Scan QR" tap="onScan" class="btn btn-primary btn-active" />
+        <Button text="Scan QR" tap="onScan" class="btn btn-primary btn-active btn-rounded-lg" />
         <Label text="{{ qr_code }}" textWrap="true" class="h2 text-center" />
     </StackLayout>
 </Page>
