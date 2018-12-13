@@ -1,41 +1,36 @@
-/*
-In NativeScript, a file with the same name as an XML file is known as
-a code-behind file. The code-behind is a great place to place your view
-logic, and to set up your page’s data binding.
-*/
+var observableModule = require("tns-core-modules/data/observable");
+var BarcodeScanner = require("nativescript-barcodescanner").BarcodeScanner;
+var barcodescanner = new BarcodeScanner();
 
-/*
-NativeScript adheres to the CommonJS specification for dealing with
-JavaScript modules. The CommonJS require() function is how you import
-JavaScript modules defined in other files.
-*/ 
-var createViewModel = require("./main-view-model").createViewModel;
-
-function onNavigatingTo(args) {
-    /*
-    This gets a reference this page’s <Page> UI component. You can
-    view the API reference of the Page to see what’s available at
-    https://docs.nativescript.org/api-reference/classes/_ui_page_.page.html
-    */
+exports.onNavigatingTo = function(args) {
     var page = args.object;
-
-    /*
-    A page’s bindingContext is an object that should be used to perform
-    data binding between XML markup and JavaScript code. Properties
-    on the bindingContext can be accessed using the {{ }} syntax in XML.
-    In this example, the {{ message }} and {{ onTap }} bindings are resolved
-    against the object returned by createViewModel().
-
-    You can learn more about data binding in NativeScript at
-    https://docs.nativescript.org/core-concepts/data-binding.
-    */
-    page.bindingContext = createViewModel();
+    page.bindingContext = new observableModule.fromObject({
+      qr_code: "No QR scanned"
+    });
 }
 
-/*
-Exporting a function in a NativeScript code-behind file makes it accessible
-to the file’s corresponding XML file. In this case, exporting the onNavigatingTo
-function here makes the navigatingTo="onNavigatingTo" binding in this page’s XML
-file work.
-*/
-exports.onNavigatingTo = onNavigatingTo;
+exports.onScan = function(args) {
+  var context = args.object.bindingContext;
+  console.log("Hit scan");
+ 
+  barcodescanner.scan({
+    formats: "QR_CODE",   // Pass in of you want to restrict scanning to certain types
+    cancelLabel: "EXIT. Also, try the volume buttons!", // iOS only, default 'Close'
+    cancelLabelBackgroundColor: "#333333", // iOS only, default '#000000' (black)
+    preferFrontCamera: false,     // default false
+    showTorchButton: true,        // default false
+    beepOnScan: true,             // Play or Suppress beep on scan (default true)
+    resultDisplayDuration: 500,   // Android only, default 1500 (ms), set to 0 to disable echoing the scanned text
+    openSettingsIfPermissionWasPreviouslyDenied: true // On iOS you can send the user to the settings app if access was previously denied
+  }).then(
+    function(result) {
+      console.log("Scan format: " + result.format);
+      console.log("Scan text:   " + result.text);
+      context.qr_code = result.text;
+    },
+    function(error) {
+      console.log("No scan: " + error);
+      context.qr_code = "No QR scanned";
+    }
+  );
+}
